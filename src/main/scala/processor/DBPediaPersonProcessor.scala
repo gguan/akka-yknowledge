@@ -71,4 +71,5 @@ class DBPediaPersonProcessor(source: String, receiver: ActorRef) extends DataPro
 
   }
 
+  def parse(input: List[String]): Either[List[KGNode], List[KGRelationship]] = ???
 }

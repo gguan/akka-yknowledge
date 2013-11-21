@@ -163,5 +163,5 @@ case class Neo4JRESTClient(implicit val conf: Config) extends DatabaseClient {
 
   }
 
-
+  def batchUpsertNodes(nodes: List[KGNode]): List[KGNode] = ???
 }

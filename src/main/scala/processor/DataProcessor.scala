@@ -9,6 +9,7 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import akka.pattern.ask
 import scala.concurrent.Await
+import scala.collection.JavaConversions._
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,8 +53,8 @@ abstract class DataProcessor(source: String, receiver: ActorRef) extends Actor w
               }
             }
           }
-          case ls: List[String] => {
-            parse(ls) match {
+          case ls: java.util.ArrayList[String] => {
+            parse(ls.toList) match {
               case Left(nodes) => {
                 val n = Await.result((receiver ? nodes), timeout.duration)
                 //            log.debug("Actor receive the node: " + n)
@@ -66,7 +67,8 @@ abstract class DataProcessor(source: String, receiver: ActorRef) extends Actor w
               }
             }
           }
-          case _ => {
+          case x: Any => {
+            println(x.getClass)
             processMessageFailure("Unknown message type!")
             sender ! Ack
           }

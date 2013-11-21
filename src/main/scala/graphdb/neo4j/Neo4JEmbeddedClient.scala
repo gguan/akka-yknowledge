@@ -86,6 +86,43 @@ case class Neo4JEmbeddedClient(implicit val conf: Config) extends DatabaseClient
     rNode
   }
 
+  def batchUpsertNodes(nodes: List[KGNode]): List[KGNode] = {
+
+    val tx = database.beginTx()
+
+    val results = nodes.map { node =>
+
+      val result = engine.execute( """start n=node:node_auto_index("""+PROP_KEY+"""={pk}) return n;""", Map("pk" -> node.key)).columnAs[Node]("n")
+
+      var n: Node = null
+
+      val props = node.properties.map { kv =>
+        kv._2 match {
+          case arr: Seq[String] => kv._1 -> arr.toArray
+          case v => kv._1 -> v
+        }
+      }.toMap
+      if (!result.hasNext) { // Create new node
+        logger.info("UPSERT - Create new node %s" format node.key)
+        n = engine.execute( """create (n { props }) return n;""", Map("props" -> props)).columnAs[Node]("n").next()
+      } else { // Update existed node
+        logger.info("UPSERT - Find node: %s" format node.key)
+        n = result.next()
+        props.foreach { kv => n.setProperty(kv._1, kv._2) }
+      }
+
+      KGNode(n.getId, n.getPropertyKeys.map { key => n.getProperty(key) match {
+        case arr: Array[String] => key -> arr.toList
+        case v => key -> v
+      }
+      }.toMap)
+    }
+
+    tx.success()
+    tx.finish()
+    results
+  }
+
   def upsertRelationship(rel: KGRelationship): Option[Any] = {
     val tx = database.beginTx()
 

@@ -19,6 +19,8 @@ trait DatabaseClient extends Logging {
 
   def upsertNode(node: KGNode): Option[KGNode]
 
+  def batchUpsertNodes(nodes: List[KGNode]): List[KGNode]
+
   def upsertRelationship(rel: KGRelationship): Option[Any]
 
   def findNodeById(id: Long): Option[KGNode]

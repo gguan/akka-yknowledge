@@ -182,4 +182,6 @@ case class TitanClient(implicit val conf: Config) extends DatabaseClient {
   def shutdown() {
     graph.shutdown()
   }
+
+  def batchUpsertNodes(nodes: List[KGNode]): List[KGNode] = ???
 }

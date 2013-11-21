@@ -28,10 +28,11 @@ trait JsonProcessorActors {
 }
 
 trait AggregatorActors {
-  this: Core with EndpointActors =>
+  this: Core with EndpointActors with DatabaseActors =>
 
 
-  val testActor = system.actorOf(Props(classOf[TestActor]))
+//  val testActor = system.actorOf(Props(classOf[TestActor]))
+  val testActor = system.actorOf(Props(classOf[JsonNodeProcessor], "json-node", databaseWriteActor).withRouter(RoundRobinRouter(conf.getInt("processor.node-json"))), name = "JsonNodeProcessorRouter")
 
   camel.context.addRoutes(new ActiveMQMessageAggregator("json-node", conf.getInt("db.batch-size"), testActor))
 }
