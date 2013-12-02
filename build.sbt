@@ -1,13 +1,13 @@
 import akka.sbt.AkkaKernelPlugin
 
-name := "akka-importer"
+name := "akka-yknowledge"
  
-version := "1.0"
+version := "1.1"
  
 scalaVersion := "2.10.3"
 
 val akkaVersion = "2.2.3"
-val neo4jVersion = "1.9.4"
+val neo4jVersion = "2.0.0-RC1"
 
 resolvers ++= Seq(
   "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/",
@@ -31,8 +31,8 @@ libraryDependencies ++= Seq(
   "io.spray" % "spray-routing" % "1.2-RC1",
   "io.spray" %% "spray-json" % "1.2.5",
   "com.tinkerpop.blueprints" % "blueprints-core" % "2.4.0",
-  "com.thinkaurelius.titan" % "titan-core" % "0.4.0",
-  "com.thinkaurelius.titan" % "titan-cassandra" % "0.4.0",
+  "com.thinkaurelius.titan" % "titan-core" % "0.4.1",
+  "com.thinkaurelius.titan" % "titan-cassandra" % "0.4.1",
   "org.anormcypher" %% "anormcypher" % "0.4.4",
   "org.apache.commons" % "commons-lang3" % "3.1",
   "com.typesafe" %% "scalalogging-slf4j" % "1.1.0-SNAPSHOT",

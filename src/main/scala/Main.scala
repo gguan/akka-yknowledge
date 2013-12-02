@@ -11,12 +11,10 @@ import graphdb.DatabaseReadActor.{Count, Clean, FindById, Search}
  * Created with IntelliJ IDEA.
  * User: gguan
  * Date: 9/11/13
- * Time: 6:58 PM
- * To change this template use File | Settings | File Templates.
  */
 
 //
-object Cli extends App with BootedCore with EndpointActors with DatabaseActors with AggregatorActors with Rest {
+object Cli extends App with BootedCore with EndpointActors with DatabaseActors with JsonBatchTransformerActors with Rest {
 
 
   private def commandLoop(): Unit = {
@@ -42,7 +40,7 @@ object Cli extends App with BootedCore with EndpointActors with DatabaseActors w
   System.exit(1)
 }
 
-class ImporterKernel extends Bootable with BootedCore with EndpointActors with DatabaseActors with DBPediaPersonProcessorActors with JsonProcessorActors with Rest {
+class ImporterKernel extends Bootable with BootedCore with EndpointActors with DatabaseActors with JsonBatchTransformerActors with Rest {
 
   def startup = {
     logger.info("System started!....")

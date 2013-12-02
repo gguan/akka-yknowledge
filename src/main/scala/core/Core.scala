@@ -15,13 +15,10 @@ import scala.util.Try
  * Created with IntelliJ IDEA.
  * User: gguan
  * Date: 9/24/13
- * Time: 2:36 PM
- * To change this template use File | Settings | File Templates.
  */
 
 /**
- * Core is type containing the ``system: ActorSystem`` member. This enables us to use it in our
- * apps as well as in our tests.
+ * Core is type containing the ``system: ActorSystem`` member and global config: Config.
  */
 trait Core extends Logging {
 
@@ -39,7 +36,7 @@ trait BootedCore extends Core {
   /**
    * Construct the ActorSystem we will use in our application
    */
-  implicit lazy val system = ActorSystem("akka-importer")
+  implicit lazy val system = ActorSystem("akka-yknowledge-importer")
 
   /**
    * Read configurations from application.conf
@@ -59,13 +56,9 @@ trait EndpointActors {
   /**
    * Initialize camel file endpoints
    */
-
   val camel = CamelExtension(system)
 
   camel.context.setStreamCaching(false)
-
-  // Line file stream endpoint
-  camel.context.addRoutes(new LineFileStreamEndpoint("dbpedia-person"))
 
   // Endpoint to read lines of nodes json
   camel.context.addRoutes(new LineFileStreamEndpoint("json-node"))
@@ -73,9 +66,9 @@ trait EndpointActors {
   camel.context.addRoutes(new LineFileStreamEndpoint("json-relationship"))
 
   // XML file stream endpoint
-  val nodeSender = system.actorOf(Props(classOf[MessageQueueSender], "json-node"))
-  val relationshipSender = system.actorOf(Props(classOf[MessageQueueSender], "json-relationship"))
-  system.actorOf(Props(classOf[YahooSportsXMLEndpoint], "yahoosports", nodeSender, relationshipSender))
+//  val nodeSender = system.actorOf(Props(classOf[MessageQueueSender], "json-node"))
+//  val relationshipSender = system.actorOf(Props(classOf[MessageQueueSender], "json-relationship"))
+//  system.actorOf(Props(classOf[YahooSportsXMLEndpoint], "yahoosports", nodeSender, relationshipSender))
 }
 
 
