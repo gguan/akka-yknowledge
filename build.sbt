@@ -1,9 +1,9 @@
 import akka.sbt.AkkaKernelPlugin
 
 name := "akka-yknowledge"
- 
+
 version := "1.1"
- 
+
 scalaVersion := "2.10.3"
 
 val akkaVersion = "2.2.3"
@@ -44,7 +44,8 @@ libraryDependencies ++= Seq(
   "org.neo4j" % "neo4j" % neo4jVersion,
   "org.neo4j" % "neo4j-kernel" % neo4jVersion,
   "org.neo4j" % "neo4j-ha" % neo4jVersion,
-  "org.neo4j.app" % "neo4j-server" % neo4jVersion classifier "static-web",
+  "org.neo4j.app" % "neo4j-server" % neo4jVersion,
+  "org.neo4j.app" % "neo4j-server" % neo4jVersion % "compile" classifier "static-web",
   "com.tinkerpop.blueprints" % "blueprints-core" % "2.4.0",
   "com.thinkaurelius.titan" % "titan-core" % titanVersion,
   "com.thinkaurelius.titan" % "titan-cassandra" % titanVersion,
