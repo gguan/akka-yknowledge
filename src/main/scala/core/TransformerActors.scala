@@ -20,10 +20,10 @@ trait JsonBatchTransformerActors {
   this: Core with EndpointActors with DatabaseActors =>
 
   val json2NodeActor = system.actorOf(Props(classOf[JsonNodeProcessor], "json-node", databaseWriteActor).withRouter(RoundRobinRouter(conf.getInt("processor.node-json"))), name = "JsonNodeProcessorRouter")
-  val json2RelationshipActor = system.actorOf(Props(classOf[JsonRelationshipProcessor], "json-relationship", databaseWriteActor).withRouter(RoundRobinRouter(conf.getInt("processor.node-relationship"))), name = "JsonNodeProcessorRouter")
+  val json2RelationshipActor = system.actorOf(Props(classOf[JsonRelationshipProcessor], "json-relationship", databaseWriteActor).withRouter(RoundRobinRouter(conf.getInt("processor.node-relationship"))), name = "JsonRelationshipProcessorRouter")
 
   // Aggregate nodes and sent to nodes transformer actors
   camel.context.addRoutes(new ActiveMQMessageAggregator("json-node", conf.getInt("db.batch-size"), json2NodeActor))
   // Aggregate relationships and sent to relationships transformer actors
-  camel.context.addRoutes(new ActiveMQMessageAggregator("json-node", conf.getInt("db.batch-size"), json2NodeActor))
+  camel.context.addRoutes(new ActiveMQMessageAggregator("json-relationship", conf.getInt("db.batch-size"), json2RelationshipActor))
 }

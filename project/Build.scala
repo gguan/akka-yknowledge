@@ -14,7 +14,7 @@ object AkkaImporterBuild extends Build {
     settings = defaultSettings ++ AkkaKernelPlugin.distSettings ++ Seq(
       libraryDependencies ++= Dependencies.importerKernel,
       distJvmOptions in Dist := "-Xms256M -Xmx1024M",
-      outputDirectory in Dist := file("target/hello-dist")
+      outputDirectory in Dist := file("target/akka-yknowledge")
     )
   )
 
@@ -51,5 +51,5 @@ object Dependency {
 
   val akkaKernel = "com.typesafe.akka" %% "akka-kernel" % V.Akka
   val akkaSlf4j  = "com.typesafe.akka" %% "akka-slf4j"  % V.Akka
-  val logback    = "ch.qos.logback"    % "logback-classic" % "1.0.0"
+  val logback    = "ch.qos.logback"    % "logback-classic" % "1.0.13"
 }

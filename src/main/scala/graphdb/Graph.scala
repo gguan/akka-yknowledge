@@ -1,18 +1,20 @@
 package graphdb
 
 import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.config.{ConfigFactory, Config}
 
 /**
  * Created with IntelliJ IDEA.
  * User: gguan
  * Date: 9/17/13
- * Time: 11:52 AM
- * To change this template use File | Settings | File Templates.
  */
 
 object Constants {
-  val PROP_KEY  = "YK_entityPrimaryKey"
-  val PROP_TYPE = "type"
+
+  val conf: Config = ConfigFactory.load()
+
+  val PROP_KEY  = conf.getString("yk.entityPrimaryKey")
+  val PROP_TYPE = conf.getString("yk.entityType")
 }
 
 trait DatabaseClient extends Logging {
@@ -21,7 +23,9 @@ trait DatabaseClient extends Logging {
 
   def batchUpsertNodes(nodes: List[KGNode]): List[KGNode]
 
-  def upsertRelationship(rel: KGRelationship): Option[Any]
+  def upsertRelationship(rel: KGRelationship): Option[KGRelationship]
+
+  def batchUpsertRelationships(rels: List[KGRelationship]): List[KGRelationship]
 
   def findNodeById(id: Long): Option[KGNode]
 
@@ -32,4 +36,4 @@ case class KGNode(id: Long = -1L, properties: Map[String, Any]) {
   def key: String = properties.get(Constants.PROP_KEY).map(_.asInstanceOf[String]).getOrElse("")
 }
 
-case class KGRelationship(id: Long = -1L, properties: Map[String, Any], start: String, end: String, label: String)
+case class KGRelationship(id: Any = -1L, properties: Map[String, Any], start: String, end: String, label: String)

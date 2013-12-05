@@ -102,8 +102,9 @@ case class TitanClient(implicit val conf: Config) extends DatabaseClient {
   /**
    * Create or update existed relationship
    */
-  def upsertRelationship(rel: KGRelationship): Option[Any] = {
+  def upsertRelationship(rel: KGRelationship): Option[KGRelationship] = {
     val tx = graph.newTransaction()
+
     val outId = upsertNode(KGNode(properties = Map(PROP_KEY -> rel.start))).get.id
     val inId = upsertNode(KGNode(properties = Map(PROP_KEY -> rel.end))).get.id
 
@@ -119,18 +120,26 @@ case class TitanClient(implicit val conf: Config) extends DatabaseClient {
         }
         tx.commit()
         graph.commit()
-        Some(edge.getId)
+        Some(rel.copy(id = edge.getId, properties = edge.getPropertyKeys.map { key => edge.getProperty[Object](key) match {
+          case arr: Array[String] => key -> arr.toList
+          case v => key -> v
+        }
+        }.toMap))
       }
       case None => {
-        val e = graph.addEdge(null, out, in, rel.label)
+        val edge = graph.addEdge(null, out, in, rel.label)
         rel.properties.map {
           kv =>
             val (key, value) = (kv._1, kv._2)
-            e.setProperty(key, value)
+            edge.setProperty(key, value)
         }
         tx.commit()
         graph.commit()
-        Some(e.getId)
+        Some(rel.copy(id = edge.getId, properties = edge.getPropertyKeys.map { key => edge.getProperty[Object](key) match {
+          case arr: Array[String] => key -> arr.toList
+          case v => key -> v
+        }
+        }.toMap))
       }
     }
   }
@@ -184,4 +193,6 @@ case class TitanClient(implicit val conf: Config) extends DatabaseClient {
   }
 
   def batchUpsertNodes(nodes: List[KGNode]): List[KGNode] = ???
+
+  def batchUpsertRelationships(rels: List[KGRelationship]): List[KGRelationship] = ???
 }

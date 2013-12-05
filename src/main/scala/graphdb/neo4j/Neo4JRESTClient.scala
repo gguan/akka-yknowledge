@@ -10,8 +10,6 @@ import scalaj.http.Http
  * Created with IntelliJ IDEA.
  * User: gguan
  * Date: 10/1/13
- * Time: 9:52 AM
- * To change this template use File | Settings | File Templates.
  */
 case class Neo4JRESTClient(implicit val conf: Config) extends DatabaseClient {
 
@@ -19,7 +17,7 @@ case class Neo4JRESTClient(implicit val conf: Config) extends DatabaseClient {
 
     Neo4jREST.setServer(host = conf.getString("db.neo4j.rest.host"), port = conf.getInt("db.neo4j.rest.port"), path = conf.getString("db.neo4j.rest.path"))
 
-    // init index
+    // Init index
     Http.postData("http://" + conf.getString("db.neo4j.rest.host") + ":" + conf.getInt("db.neo4j.rest.port") + conf.getString("db.neo4j.rest.path") + "index/node/",
       """
         {
@@ -47,27 +45,6 @@ case class Neo4JRESTClient(implicit val conf: Config) extends DatabaseClient {
 
   def findNodeById(id: Long): Option[KGNode] = {
     Cypher( """start n=node({id}) return n;""").on("id" -> id)().headOption match {
-      case Some(row) => {
-        val node = row[NeoNode]("n")
-        Some(KGNode(node.id, node.props))
-      }
-      case None => None
-    }
-  }
-
-  def findRelationship(start: Long, end: Long) = {
-    Cypher( """START n1=node({n1}), n2=node({n2}) MATCH n1-[r?]->n2 return r;""").on("n1" -> start, "n2" -> end)().headOption match {
-      case Some(row) => {
-        val oldRel = row[NeoRelationship]("r")
-        println(oldRel)
-        oldRel
-      }
-      case None => None
-    }
-  }
-
-  def createNode(node: KGNode): Option[KGNode] = {
-    Cypher( """create (n { props }) return n;""").on("props" -> node.properties)().headOption match {
       case Some(row) => {
         val node = row[NeoNode]("n")
         Some(KGNode(node.id, node.props))
@@ -104,7 +81,7 @@ case class Neo4JRESTClient(implicit val conf: Config) extends DatabaseClient {
 
   }
 
-  def upsertRelationship(rel: KGRelationship): Option[Any] = {
+  def upsertRelationship(rel: KGRelationship): Option[KGRelationship] = {
 
     (findNodeByKey(rel.start), findNodeByKey(rel.end)) match {
       case (Some(n1), Some(n2)) => {
@@ -113,7 +90,10 @@ case class Neo4JRESTClient(implicit val conf: Config) extends DatabaseClient {
             logger.info("UPSERT - Find relationship: %s-[%s]->%s" format (rel.start, rel.label, rel.end))
             val oldRel = row[NeoRelationship]("r")
             Cypher( """START r=relationship({id}) SET r={props} return r;""").on("id" -> oldRel.id, "props" -> (oldRel.props ++ rel.properties))().headOption match {
-              case Some(row) => Some(row[NeoRelationship]("r").id)
+              case Some(row) => {
+                val r = row[NeoRelationship]("r")
+                Some(rel.copy(id = r.id, properties = r.props))
+              }
               case None =>  None
             }
           }
@@ -122,7 +102,7 @@ case class Neo4JRESTClient(implicit val conf: Config) extends DatabaseClient {
             Cypher( """START n1=node({n1}), n2=node({n2}) CREATE n1-[r:""" + rel.label + """ {props}]->n2 RETURN r;""").on("n1" -> n1.id, "n2" -> n2.id, "props" -> rel.properties)().headOption match {
               case Some(row) => {
                 val r = row[NeoRelationship]("r")
-                Some(r.id)
+                Some(rel.copy(id = r.id, properties = r.props))
               }
               case None => None
             }
@@ -134,7 +114,7 @@ case class Neo4JRESTClient(implicit val conf: Config) extends DatabaseClient {
         Cypher( """START n2=node({id}) CREATE (n1 { """+PROP_KEY+""":'"""+rel.start+"""' })-[r:""" + rel.label + """ {props}]->n2 RETURN r;""").on("id"->n2.id, "props" -> rel.properties)().headOption match {
           case Some(row) => {
             val r = row[NeoRelationship]("r")
-            Some(r.id)
+            Some(rel.copy(id = r.id, properties = r.props))
           }
           case None => None
         }
@@ -144,7 +124,7 @@ case class Neo4JRESTClient(implicit val conf: Config) extends DatabaseClient {
         Cypher( """START n1=node({id}) CREATE n1-[r:""" + rel.label + """ {props}]->(n2 { """+PROP_KEY+""":'"""+rel.end+"""' }) RETURN r;""").on("id"->n1.id, "props" -> rel.properties)().headOption match {
           case Some(row) => {
             val r = row[NeoRelationship]("r")
-            Some(r.id)
+            Some(rel.copy(id = r.id, properties = r.props))
           }
           case None => None
         }
@@ -154,14 +134,34 @@ case class Neo4JRESTClient(implicit val conf: Config) extends DatabaseClient {
         Cypher( """CREATE (n1 { """+PROP_KEY+""":'"""+rel.start+"""' })-[r:""" + rel.label + """ {props}]->(n2 { """+PROP_KEY+""":'"""+rel.end+"""' }) RETURN r;""").on("props" -> rel.properties)().headOption match {
           case Some(row) => {
             val r = row[NeoRelationship]("r")
-            Some(r.id)
+            Some(rel.copy(id = r.id, properties = r.props))
           }
           case None => None
         }
       }
     }
-
   }
 
-  def batchUpsertNodes(nodes: List[KGNode]): List[KGNode] = ???
+  def batchUpsertNodes(nodes: List[KGNode]): List[KGNode] = {
+    nodes.map { node =>
+      upsertNode(node).getOrElse(null)
+    }.filter(_ != null)
+  }
+
+  def batchUpsertRelationships(rels: List[KGRelationship]): List[KGRelationship] = {
+    rels.map { rel =>
+      upsertRelationship(rel).getOrElse(null)
+    }.filter(_ != null)
+  }
+
+
+  private def createNode(node: KGNode): Option[KGNode] = {
+    Cypher( """create (n { props }) return n;""").on("props" -> node.properties)().headOption match {
+      case Some(row) => {
+        val node = row[NeoNode]("n")
+        Some(KGNode(node.id, node.props))
+      }
+      case None => None
+    }
+  }
 }

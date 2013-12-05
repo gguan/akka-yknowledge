@@ -28,8 +28,7 @@ abstract class DataProcessor(source: String, receiver: ActorRef) extends Actor w
 
     case msg: CamelMessage => {
 
-      implicit val timeout = Timeout(5.seconds)
-
+      implicit val timeout = Timeout(60.seconds)
 
       msg.body match {
         // Parse a single node/relationship
