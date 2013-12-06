@@ -1,11 +1,15 @@
 package processor
 
 import akka.actor.ActorRef
-import graphdb.{KGRelationship, KGNode}
+import graphdb._
 import spray.json._
 import spray.json.DefaultJsonProtocol._
 import utils._
 import java.lang.Exception
+import graphdb.KGRelationship
+import graphdb.KGNode
+import scala.Some
+import graphdb.KGList
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,7 +30,7 @@ class JsonNodeProcessor(source: String, receiver: ActorRef) extends DataProcesso
     }
   }
 
-  def parse(input: List[String]): Either[List[KGNode], List[KGRelationship]] = {
+  def parse(input: List[String]): Either[KGNodeList, KGRelationshipList] = {
     val nodes = input.map { item =>
       try {
         val props = item.asJson.convertTo[Map[String, Any]]
@@ -37,7 +41,7 @@ class JsonNodeProcessor(source: String, receiver: ActorRef) extends DataProcesso
         }
       }
     }.filter(_.isInstanceOf[KGNode]).map(_.asInstanceOf[KGNode]).toList
-    Left(nodes)
+    Left(KGNodeList(nodes))
   }
 }
 
@@ -64,24 +68,27 @@ class JsonRelationshipProcessor(source: String, receiver: ActorRef) extends Data
     }
   }
 
-  def parse(input: List[String]): Either[List[KGNode], List[KGRelationship]] = {
+  def parse(input: List[String]): Either[KGNodeList, KGRelationshipList] = {
     val rels = input.map { item =>
       try {
+//        println(item)
         val props = item.asJson.convertTo[Map[String, Any]]
         val start = props.get("outV").get
         val end = props.get("inV").get
         val label = props.get("type").get
+//        println(props + "\n" + start + "\n" + end + "\n" + label)
         if (start == null || end == null || label == null) {
-          None
+          null
         } else {
-          Right(KGRelationship(start= start.asInstanceOf[String], end = end.asInstanceOf[String], label = label.asInstanceOf[String], properties = props - "outV" - "inV" - "type"))
+          KGRelationship(start= start.asInstanceOf[String], end = end.asInstanceOf[String], label = label.asInstanceOf[String], properties = props - "outV" - "inV" - "type")
         }
       } catch {
         case e: Exception => {
+          e.printStackTrace()
           processMessageFailure(item)
         }
       }
     }.filter(_.isInstanceOf[KGRelationship]).map(_.asInstanceOf[KGRelationship]).toList
-    Right(rels)
+    Right(KGRelationshipList(rels))
   }
 }

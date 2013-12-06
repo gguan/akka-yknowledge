@@ -1,6 +1,7 @@
 package processor
 
 import akka.actor.ActorRef
+import akka.camel._
 import org.apache.camel.builder.RouteBuilder
 
 /**
@@ -12,6 +13,6 @@ import org.apache.camel.builder.RouteBuilder
 class ActiveMQMessageForwarder(source: String, receiver: ActorRef) extends RouteBuilder {
 
   def configure {
-    from("activemq:data.%s" format source)..to(receiver)
+    from("activemq:data.%s" format source).to(receiver)
   }
 }

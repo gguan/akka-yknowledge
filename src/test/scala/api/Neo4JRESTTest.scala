@@ -38,6 +38,7 @@ class Neo4JRESTTest extends FunSuite with BeforeAndAfter {
 
 
     println(client.upsertRelationship(KGRelationship(properties = Map("test1" -> "test1"), start = "key_1", end = "key_2", label = "TEST")))
+    println(client.upsertRelationship(KGRelationship(properties = Map("test1" -> "test2", "test2"->"test3"), start = "key_1", end = "key_2", label = "TEST")))
     println(client.upsertRelationship(KGRelationship(properties = Map("test1" -> "test1"), start = "key_1", end = "key_3", label = "TEST")))
     println(client.upsertRelationship(KGRelationship(properties = Map("test1" -> "test1"), start = "key_4", end = "key_1", label = "TEST")))
 

@@ -1,7 +1,7 @@
 package processor
 
 import akka.actor.ActorRef
-import graphdb.{KGRelationship, KGNode}
+import graphdb.{KGRelationshipList, KGNodeList, KGRelationship, KGNode}
 import graphdb.Constants._
 
 /**
@@ -71,5 +71,5 @@ class DBPediaPersonProcessor(source: String, receiver: ActorRef) extends DataPro
 
   }
 
-  def parse(input: List[String]): Either[List[KGNode], List[KGRelationship]] = ???
+  def parse(input: List[String]): Either[KGNodeList, KGRelationshipList] = ???
 }

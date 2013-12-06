@@ -1,6 +1,6 @@
 package processor
 
-import graphdb.{KGRelationship, KGNode}
+import graphdb._
 import akka.camel.{Ack, CamelMessage}
 import akka.actor.{Actor, ActorLogging, ActorRef}
 import akka.util.Timeout
@@ -8,6 +8,10 @@ import scala.concurrent.duration._
 import akka.pattern.ask
 import scala.concurrent.Await
 import scala.collection.JavaConversions._
+import graphdb.KGRelationship
+import graphdb.KGNodeList
+import graphdb.KGNode
+import scala.Some
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,7 +22,7 @@ abstract class DataProcessor(source: String, receiver: ActorRef) extends Actor w
 
   def parse(input: String): Option[Either[KGNode, KGRelationship]]
 
-  def parse(input: List[String]): Either[List[KGNode], List[KGRelationship]]
+  def parse(input: List[String]): Either[KGNodeList, KGRelationshipList]
 
   def processMessageFailure(input: String) {
     log.error("Bad message: %s" format input)
@@ -56,6 +60,7 @@ abstract class DataProcessor(source: String, receiver: ActorRef) extends Actor w
               sender ! Ack
             }
             case Right(rels) => {
+              println(rels)
               Await.result((receiver ? rels), timeout.duration)
               sender ! Ack
             }

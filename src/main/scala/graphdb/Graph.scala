@@ -37,3 +37,11 @@ case class KGNode(id: Long = -1L, properties: Map[String, Any]) {
 }
 
 case class KGRelationship(id: Any = -1L, properties: Map[String, Any], start: String, end: String, label: String)
+
+case class KGList[+A](val list: List[A])
+
+case class KGNodeList(list: List[KGNode])
+//  extends KGList[KGNode](list)
+
+case class KGRelationshipList(list: List[KGRelationship])
+//  extends KGList[KGRelationship](list)

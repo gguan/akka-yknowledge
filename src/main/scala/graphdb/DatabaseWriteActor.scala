@@ -18,13 +18,17 @@ class DatabaseWriteActor(client: DatabaseClient) extends Actor with ActorLogging
       case Some(n) => sender ! n
       case None => sender ! "WTF?!"
     }
-    case nodes: List[KGNode] => client.batchUpsertNodes(nodes) match {
-      case x :: xs => sender ! "Done"
+    case KGNodeList(nodes) => client.batchUpsertNodes(nodes) match {
+      case x :: xs => sender ! "Node batch done!"
       case Nil => sender ! "WTF?!"
     }
     case rel: KGRelationship => client.upsertRelationship(rel)  match {
       case Some(r) => sender ! r
       case None => sender ! "WTF?!"
+    }
+    case KGRelationshipList(rels) => client.batchUpsertRelationships(rels)  match {
+      case x :: xs => sender ! "Relatioships batch done!"
+      case Nil => sender ! "WTF?!"
     }
     case _ => sender ! "WTF?!"
   }
