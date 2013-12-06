@@ -60,7 +60,6 @@ abstract class DataProcessor(source: String, receiver: ActorRef) extends Actor w
               sender ! Ack
             }
             case Right(rels) => {
-              println(rels)
               Await.result((receiver ? rels), timeout.duration)
               sender ! Ack
             }

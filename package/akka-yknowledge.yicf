@@ -1,0 +1,25 @@
+PRODUCT_NAME = akka-yknowledge
+VERSION = `/bin/sh $(PRODUCT_NAME).README.sh | awk '/^Version/ {print $2; exit}'`
+SHORT_DESC = `/bin/sh $(PRODUCT_NAME).README.sh | head -1`
+LONG_DESC  = `/bin/sh $(PRODUCT_NAME).README.sh`
+CUSTODIAN = cap-dev@yahoo-inc.com http://twiki.corp.yahoo.com/view/P13nContextual
+
+PERM = 0644
+OWNER = root
+GROUP = wheel
+PACKAGE_OS_SPECIFIC = no
+# SRCDIRS = ..
+
+YINST bug-product "YK"
+YINST bug-component "Akka Yknowledge"
+
+d 755 - - libexec/akka-yknowledge
+g 644 - - libexec/akka-yknowledge/lib/ ../lib/*.jar
+g 644 - - libexec/akka-yknowledge/config/ ../config/*.*
+g 644 - - libexec/akka-yknowledge/deploy/ ../deploy/*.*
+f 755 - - libexec/akka-yknowledge/bin/ ../bin/*.*
+
+
+YINST start 1000 /home/y/libexec/akka-yknowledge/bin/start > /tmp/akka-yk.log 2>&1 &
+YINST stop 1000 kill `cat /home/y/libexec/akka-yknowledge/RUNNING_PID`
+YINST restart 1000 kill 'cat /home/y/libexec/akka-yknowledge/RUNNING_PID' && /home/y/libexec/akka-yknowledge/bin/start &

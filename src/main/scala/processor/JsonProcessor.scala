@@ -9,7 +9,6 @@ import java.lang.Exception
 import graphdb.KGRelationship
 import graphdb.KGNode
 import scala.Some
-import graphdb.KGList
 
 /**
  * Created with IntelliJ IDEA.
@@ -71,12 +70,10 @@ class JsonRelationshipProcessor(source: String, receiver: ActorRef) extends Data
   def parse(input: List[String]): Either[KGNodeList, KGRelationshipList] = {
     val rels = input.map { item =>
       try {
-//        println(item)
         val props = item.asJson.convertTo[Map[String, Any]]
         val start = props.get("outV").get
         val end = props.get("inV").get
         val label = props.get("type").get
-//        println(props + "\n" + start + "\n" + end + "\n" + label)
         if (start == null || end == null || label == null) {
           null
         } else {
